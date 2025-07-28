@@ -1,0 +1,65 @@
+.tech-stack {
+  overflow-x: hidden;
+  white-space: nowrap;
+  width: 100%;
+  position: relative;
+  padding: 20px 0;
+}
+
+.tech-stack-track {
+  display: flex;
+  animation: scroll 30s linear infinite;
+  will-change: transform;
+}
+
+.tech-stack-image {
+  margin-right: 50px;
+  height: 80px;
+  width: 80px;
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.tech-stack-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tech-stack-image:hover {
+  transform: scale(1.1);
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-1 * (80px + 50px) * 18));
+  }
+}
+
+/* Fade effects for desktop */
+@media (min-width: 768px) {
+  .tech-stack::before,
+  .tech-stack::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 200px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .tech-stack::before {
+    left: 0;
+    background: linear-gradient(to right, black, transparent);
+  }
+
+  .tech-stack::after {
+    right: 0;
+    background: linear-gradient(to left, black, transparent);
+  }
+} 
