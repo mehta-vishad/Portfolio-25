@@ -7,11 +7,25 @@ export default function AsciiAnimation() {
   const [isReady, setIsReady] = useState(false)
   const animationRef = useRef<number | undefined>(undefined)
   const cleanupRef = useRef<(() => void) | null>(null)
+  const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
   useEffect(() => {
     let isMounted = true
+    let camera: any, renderer: any, effect: any
 
     const loadAnimation = async () => {
+      if (!containerRef.current) return
+      
+      const { clientWidth, clientHeight } = containerRef.current
+      console.log("Container size:", clientWidth, clientHeight)
+      
+      // Wait for container to be properly measured
+      if (clientWidth === 0 || clientHeight === 0) {
+        console.log("Container not ready, retrying...")
+        setTimeout(loadAnimation, 100)
+        return
+      }
+
       try {
         const [THREE, { AsciiEffect }] = await Promise.all([
           import("three"),
@@ -20,10 +34,7 @@ export default function AsciiAnimation() {
 
         if (!isMounted || !containerRef.current) return
 
-        let camera: InstanceType<typeof THREE.PerspectiveCamera>,
-          scene: InstanceType<typeof THREE.Scene>,
-          renderer: InstanceType<typeof THREE.WebGLRenderer>,
-          effect: any,
+        let scene: InstanceType<typeof THREE.Scene>,
           sphere: InstanceType<typeof THREE.Mesh>
 
         const start = Date.now()
@@ -31,9 +42,10 @@ export default function AsciiAnimation() {
         function init() {
           try {
             const container = containerRef.current!
+            console.log("Initializing with container size:", container.clientWidth, container.clientHeight)
             
-            // Camera setup - exact same as Three.js example
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000)
+            // Camera setup - using container dimensions
+            camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 1, 1000)
             camera.position.y = 150
             camera.position.z = 500
 
@@ -96,25 +108,12 @@ export default function AsciiAnimation() {
             effect.domElement.style.verticalAlign = 'top'
 
             container.appendChild(effect.domElement)
+            console.log("ASCII animation initialized successfully")
             setIsReady(true)
 
           } catch (error) {
             console.error("Failed to initialize ASCII animation:", error)
             setIsReady(true)
-          }
-        }
-
-        function onWindowResize() {
-          if (!camera || !renderer || !effect || !containerRef.current) return
-          
-          try {
-            const container = containerRef.current
-            camera.aspect = container.clientWidth / container.clientHeight
-            camera.updateProjectionMatrix()
-            renderer.setSize(container.clientWidth, container.clientHeight)
-            effect.setSize(container.clientWidth, container.clientHeight)
-          } catch (error) {
-            console.error("Resize error:", error)
           }
         }
 
@@ -153,7 +152,7 @@ export default function AsciiAnimation() {
             try {
               containerRef.current.removeChild(effect.domElement)
             } catch (e) {
-              // Element might already be removed
+              console.log("Effect element already removed")
             }
           }
           
@@ -163,15 +162,11 @@ export default function AsciiAnimation() {
           if (scene) {
             scene.clear()
           }
-          
-          window.removeEventListener("resize", onWindowResize)
         }
 
         // Initialize and start - exactly like official example
         init()
         animate()
-        
-        window.addEventListener("resize", onWindowResize)
 
       } catch (error) {
         console.error("Failed to load Three.js modules:", error)
@@ -190,6 +185,72 @@ export default function AsciiAnimation() {
     }
   }, [])
 
+  // ResizeObserver for robust resize handling
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect
+        console.log("ResizeObserver triggered:", width, height)
+        
+        if (width > 0 && height > 0) {
+          // Get the current camera, renderer, and effect from the closure
+          const container = containerRef.current
+          if (container && isReady) {
+            // We need to access these from the animation scope
+            // This is a bit tricky with the current structure, so let's use a different approach
+            const event = new CustomEvent('ascii-resize', { 
+              detail: { width, height } 
+            })
+            container.dispatchEvent(event)
+          }
+        }
+      }
+    })
+
+    observer.observe(containerRef.current)
+    resizeObserverRef.current = observer
+
+    return () => {
+      observer.disconnect()
+      resizeObserverRef.current = null
+    }
+  }, [isReady])
+
+  // Handle custom resize events
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleResize = (event: any) => {
+      const { width, height } = event.detail
+      console.log("Handling resize:", width, height)
+      
+      // Find the Three.js elements in the DOM
+      const canvas = container.querySelector('canvas')
+      const asciiElement = container.querySelector('div')
+      
+      if (canvas && asciiElement) {
+        // Update canvas size
+        canvas.width = width
+        canvas.height = height
+        canvas.style.width = `${width}px`
+        canvas.style.height = `${height}px`
+        
+        // Update ASCII element size
+        asciiElement.style.width = `${width}px`
+        asciiElement.style.height = `${height}px`
+      }
+    }
+
+    container.addEventListener('ascii-resize', handleResize)
+
+    return () => {
+      container.removeEventListener('ascii-resize', handleResize)
+    }
+  }, [isReady])
+
   return (
     <div 
       ref={containerRef} 
@@ -199,7 +260,9 @@ export default function AsciiAnimation() {
         overflow: "hidden",
         position: "relative",
         opacity: isReady ? 1 : 0,
-        transition: "opacity 0.5s ease-in-out"
+        transition: "opacity 0.5s ease-in-out",
+        // Ensure the container is never 0x0
+        minWidth: "100px"
       }}
     />
   )
