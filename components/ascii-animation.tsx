@@ -71,6 +71,20 @@ export default function AsciiAnimation() {
             scene = new THREE.Scene()
             scene.background = new THREE.Color(0, 0, 0)
 
+            // CRITICAL: Add fullscreen black quad to fill framebuffer
+            const blackPlane = new THREE.Mesh(
+              new THREE.PlaneGeometry(2000, 2000),
+              new THREE.MeshBasicMaterial({ 
+                color: 0x000000, 
+                depthTest: false,
+                alphaTest: 1.0,
+                opacity: 1,
+                transparent: false
+              })
+            )
+            blackPlane.position.z = -999 // Put it far behind everything
+            scene.add(blackPlane)
+
             // Lighting - exactly like the official example
             const pointLight1 = new THREE.PointLight(0xffffff, 3, 0, 0)
             pointLight1.position.set(500, 500, 500)
@@ -85,7 +99,9 @@ export default function AsciiAnimation() {
               new THREE.SphereGeometry(200, 20, 10),
               new THREE.MeshPhongMaterial({ 
                 flatShading: true,
-                transparent: false // Ensure no transparency
+                transparent: false,
+                alphaTest: 1.0,
+                opacity: 1
               })
             )
             scene.add(sphere)
@@ -95,12 +111,23 @@ export default function AsciiAnimation() {
               new THREE.PlaneGeometry(400, 400),
               new THREE.MeshBasicMaterial({ 
                 color: 0xe0e0e0,
-                transparent: false // Ensure no transparency
+                transparent: false,
+                alphaTest: 1.0,
+                opacity: 1
               })
             )
             plane.position.y = -200
             plane.rotation.x = -Math.PI / 2
             scene.add(plane)
+
+            // CRITICAL: Force all materials to be fully opaque
+            scene.traverse((obj: any) => {
+              if (obj.isMesh && obj.material) {
+                obj.material.alphaTest = 1.0
+                obj.material.opacity = 1
+                obj.material.transparent = false
+              }
+            })
 
             // CRITICAL: Production-stable renderer settings
             renderer = new THREE.WebGLRenderer({
@@ -141,6 +168,15 @@ export default function AsciiAnimation() {
             effect.domElement.style.verticalAlign = 'top'
 
             container.appendChild(effect.domElement)
+
+            // CRITICAL: Pre-warm the effect with a clear dummy frame
+            console.log("Pre-warming effect with dummy clear frame...")
+            renderer.clear()
+            const dummyScene = new THREE.Scene()
+            dummyScene.background = new THREE.Color(0, 0, 0)
+            const dummyCamera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 1, 1000)
+            effect.render(dummyScene, dummyCamera)
+            
             console.log("ASCII animation initialized successfully")
             setIsReady(true)
 
@@ -228,9 +264,15 @@ export default function AsciiAnimation() {
         cleanup.handleResize = handleResize
         cleanupRef.current = cleanup
 
-        // Initialize and start - exactly like official example
+        // CRITICAL: Initialize first, then delay animate() to let GPU stabilize
         init()
-        animate()
+        console.log("Delaying animation start for GPU stabilization...")
+        setTimeout(() => {
+          if (isMounted) {
+            console.log("Starting animation after GPU stabilization")
+            animate()
+          }
+        }, 50)
 
       } catch (error) {
         console.error("Failed to load Three.js modules:", error)
