@@ -120,12 +120,12 @@ export default function AsciiAnimation() {
             plane.rotation.x = -Math.PI / 2
             scene.add(plane)
 
-            // CRITICAL: Production-stable renderer settings
+            // CRITICAL: Production-stable renderer settings with preserveDrawingBuffer fallback
             renderer = new THREE.WebGLRenderer({
               antialias: false,
               alpha: false, // No alpha transparency
               powerPreference: "default",
-              preserveDrawingBuffer: false, // Prevents stale pixels from being read
+              preserveDrawingBuffer: true, // Last resort fallback for consistent framebuffer
             })
             
             // CRITICAL: WebGL framebuffer fixes
@@ -142,9 +142,11 @@ export default function AsciiAnimation() {
             console.log("Effect size:", container.clientWidth, container.clientHeight)
             console.log("Renderer size:", renderer.getSize(new THREE.Vector2()))
             
-            // Critical: Apply exact same styling as official example
+            // CRITICAL: Enhanced DOM styling to prevent blend artifacts
             effect.domElement.style.color = 'white'
             effect.domElement.style.backgroundColor = 'black'
+            effect.domElement.style.background = 'black' // Additional fallback
+            effect.domElement.style.opacity = '1.0' // Explicit opacity
             effect.domElement.style.fontFamily = 'Courier, monospace'
             effect.domElement.style.fontWeight = 'normal'
             effect.domElement.style.fontSize = '12px'
@@ -158,10 +160,23 @@ export default function AsciiAnimation() {
             effect.domElement.style.textAlign = 'left'
             effect.domElement.style.verticalAlign = 'top'
 
+            // CRITICAL: Offscreen dummy render to warm up GPU on Vercel
+            console.log("Performing offscreen dummy render for GPU warmup...")
+            const dummyTarget = new THREE.WebGLRenderTarget(32, 32)
+            renderer.setRenderTarget(dummyTarget)
+            renderer.clearColor()
+            renderer.clearDepth() 
+            renderer.clear()
+            renderer.render(scene, camera)
+            renderer.setRenderTarget(null)
+            dummyTarget.dispose() // Clean up
+
             container.appendChild(effect.domElement)
 
-            // CRITICAL: Force one clean render before animate loop
-            console.log("Pre-warming AsciiEffect with clean render...")
+            // CRITICAL: Force one clean render with full buffer clearing
+            console.log("Pre-warming AsciiEffect with full buffer clear...")
+            renderer.clearColor()
+            renderer.clearDepth()
             renderer.clear()
             effect.render(scene, camera)
 
@@ -175,7 +190,7 @@ export default function AsciiAnimation() {
               }
             })
             
-            console.log("ASCII animation initialized successfully")
+            console.log("ASCII animation initialized successfully with all fixes")
             setIsReady(true)
 
           } catch (error) {
@@ -199,8 +214,11 @@ export default function AsciiAnimation() {
             sphere.rotation.x = timer * 0.0003
             sphere.rotation.z = timer * 0.0002
 
-            // CRITICAL: Force clearing the canvas before rendering
+            // 🔥 CRITICAL: Full framebuffer reset - all 3 clear methods
+            renderer.clearColor()
+            renderer.clearDepth()
             renderer.clear()
+
             effect.render(scene, camera)
             
             if (isMounted) {
@@ -267,7 +285,7 @@ export default function AsciiAnimation() {
         console.log("Delaying animation start for framebuffer stabilization...")
         setTimeout(() => {
           if (isMounted) {
-            console.log("Starting AsciiEffect animation after framebuffer stabilization")
+            console.log("Starting AsciiEffect animation with full buffer clearing")
             animate()
           }
         }, 50) // Wait 50ms to let framebuffer settle
