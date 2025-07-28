@@ -3,13 +3,14 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Inter } from "next/font/google"
 import type { Metadata } from "next"
+import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Vishad Mehta | Software Developer",
   description: "Portfolio for Vishad Mehta, Software Developer",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -23,10 +24,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class">
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
 }
-
-
-import './globals.css'
