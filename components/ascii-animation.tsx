@@ -69,21 +69,21 @@ export default function AsciiAnimation() {
 
             // Scene setup
             scene = new THREE.Scene()
-            scene.background = new THREE.Color(0, 0, 0)
+            scene.background = new THREE.Color(0x000000) // Safety net
 
-            // CRITICAL: Add fullscreen black quad to fill framebuffer
-            const blackPlane = new THREE.Mesh(
-              new THREE.PlaneGeometry(2000, 2000),
+            // CRITICAL: Add giant black backdrop to flush framebuffer completely
+            const backdrop = new THREE.Mesh(
+              new THREE.PlaneGeometry(5000, 5000),
               new THREE.MeshBasicMaterial({ 
                 color: 0x000000, 
                 depthTest: false,
-                alphaTest: 1.0,
+                transparent: false,
                 opacity: 1,
-                transparent: false
+                alphaTest: 1.0
               })
             )
-            blackPlane.position.z = -999 // Put it far behind everything
-            scene.add(blackPlane)
+            backdrop.position.z = -999
+            scene.add(backdrop)
 
             // Lighting - exactly like the official example
             const pointLight1 = new THREE.PointLight(0xffffff, 3, 0, 0)
@@ -100,8 +100,8 @@ export default function AsciiAnimation() {
               new THREE.MeshPhongMaterial({ 
                 flatShading: true,
                 transparent: false,
-                alphaTest: 1.0,
-                opacity: 1
+                opacity: 1,
+                alphaTest: 1.0
               })
             )
             scene.add(sphere)
@@ -112,22 +112,13 @@ export default function AsciiAnimation() {
               new THREE.MeshBasicMaterial({ 
                 color: 0xe0e0e0,
                 transparent: false,
-                alphaTest: 1.0,
-                opacity: 1
+                opacity: 1,
+                alphaTest: 1.0
               })
             )
             plane.position.y = -200
             plane.rotation.x = -Math.PI / 2
             scene.add(plane)
-
-            // CRITICAL: Force all materials to be fully opaque
-            scene.traverse((obj: any) => {
-              if (obj.isMesh && obj.material) {
-                obj.material.alphaTest = 1.0
-                obj.material.opacity = 1
-                obj.material.transparent = false
-              }
-            })
 
             // CRITICAL: Production-stable renderer settings
             renderer = new THREE.WebGLRenderer({
@@ -143,12 +134,7 @@ export default function AsciiAnimation() {
             renderer.setSize(container.clientWidth, container.clientHeight)
             renderer.setPixelRatio(1) // Fixed pixel ratio for consistency
 
-            // DIAGNOSTIC: Use plain renderer instead of AsciiEffect
-            console.log("🧪 DIAGNOSTIC MODE: Using plain renderer instead of AsciiEffect")
-            container.appendChild(renderer.domElement)
-            
-            // ASCII effect setup (commented out for diagnostic)
-            /*
+            // ASCII effect - using exact same settings as official example
             effect = new AsciiEffect(renderer, ' .:-+*=%@#', { invert: true })
             effect.setSize(container.clientWidth, container.clientHeight)
             
@@ -174,16 +160,22 @@ export default function AsciiAnimation() {
 
             container.appendChild(effect.domElement)
 
-            // CRITICAL: Pre-warm the effect with a clear dummy frame
-            console.log("Pre-warming effect with dummy clear frame...")
+            // CRITICAL: Force one clean render before animate loop
+            console.log("Pre-warming AsciiEffect with clean render...")
             renderer.clear()
-            const dummyScene = new THREE.Scene()
-            dummyScene.background = new THREE.Color(0, 0, 0)
-            const dummyCamera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 1, 1000)
-            effect.render(dummyScene, dummyCamera)
-            */
+            effect.render(scene, camera)
+
+            // CRITICAL: Force all materials to be opaque (traverse after all objects added)
+            scene.traverse((obj: any) => {
+              if (obj.isMesh && obj.material) {
+                obj.material.transparent = false
+                obj.material.opacity = 1
+                obj.material.alphaTest = 1.0
+                console.log("Enforced opacity on:", obj.material.type)
+              }
+            })
             
-            console.log("🧪 DIAGNOSTIC: Plain WebGL renderer initialized successfully")
+            console.log("ASCII animation initialized successfully")
             setIsReady(true)
 
           } catch (error) {
@@ -192,9 +184,8 @@ export default function AsciiAnimation() {
           }
         }
 
-        // DIAGNOSTIC: Plain renderer animate function
         function animate() {
-          if (!isMounted || !scene || !camera || !renderer || !sphere) return
+          if (!isMounted || !scene || !camera || !effect || !sphere) return
 
           try {
             const timer = Date.now() - start
@@ -208,9 +199,9 @@ export default function AsciiAnimation() {
             sphere.rotation.x = timer * 0.0003
             sphere.rotation.z = timer * 0.0002
 
-            // DIAGNOSTIC: Use plain renderer instead of AsciiEffect
+            // CRITICAL: Force clearing the canvas before rendering
             renderer.clear()
-            renderer.render(scene, camera)
+            effect.render(scene, camera)
             
             if (isMounted) {
               animationRef.current = requestAnimationFrame(animate)
@@ -222,7 +213,7 @@ export default function AsciiAnimation() {
 
         // Resize handler
         function handleResize() {
-          if (!camera || !renderer || !containerRef.current) return
+          if (!camera || !renderer || !effect || !containerRef.current) return
           
           try {
             const container = containerRef.current
@@ -235,9 +226,11 @@ export default function AsciiAnimation() {
             // Update renderer
             renderer.setSize(container.clientWidth, container.clientHeight)
             
-            // Update effect (commented out for diagnostic)
-            // effect.setSize(container.clientWidth, container.clientHeight)
+            // Update effect
+            effect.setSize(container.clientWidth, container.clientHeight)
             
+            // Debug logging after resize
+            console.log("After resize - Effect size:", container.clientWidth, container.clientHeight)
             console.log("After resize - Renderer size:", renderer.getSize(new THREE.Vector2()))
             
           } catch (error) {
@@ -251,11 +244,11 @@ export default function AsciiAnimation() {
             cancelAnimationFrame(animationRef.current)
           }
           
-          if (containerRef.current && renderer?.domElement) {
+          if (containerRef.current && effect?.domElement) {
             try {
-              containerRef.current.removeChild(renderer.domElement)
+              containerRef.current.removeChild(effect.domElement)
             } catch (e) {
-              console.log("Renderer element already removed")
+              console.log("Effect element already removed")
             }
           }
           
@@ -269,15 +262,15 @@ export default function AsciiAnimation() {
         cleanup.handleResize = handleResize
         cleanupRef.current = cleanup
 
-        // CRITICAL: Initialize first, then delay animate() to let GPU stabilize
+        // CRITICAL: Initialize first, then delay animate() to let framebuffer settle
         init()
-        console.log("🧪 DIAGNOSTIC: Delaying animation start for GPU stabilization...")
+        console.log("Delaying animation start for framebuffer stabilization...")
         setTimeout(() => {
           if (isMounted) {
-            console.log("🧪 DIAGNOSTIC: Starting plain renderer animation")
+            console.log("Starting AsciiEffect animation after framebuffer stabilization")
             animate()
           }
-        }, 50)
+        }, 50) // Wait 50ms to let framebuffer settle
 
       } catch (error) {
         console.error("Failed to load Three.js modules:", error)
