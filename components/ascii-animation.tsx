@@ -143,7 +143,12 @@ export default function AsciiAnimation() {
             renderer.setSize(container.clientWidth, container.clientHeight)
             renderer.setPixelRatio(1) // Fixed pixel ratio for consistency
 
-            // ASCII effect - using exact same settings as official example
+            // DIAGNOSTIC: Use plain renderer instead of AsciiEffect
+            console.log("🧪 DIAGNOSTIC MODE: Using plain renderer instead of AsciiEffect")
+            container.appendChild(renderer.domElement)
+            
+            // ASCII effect setup (commented out for diagnostic)
+            /*
             effect = new AsciiEffect(renderer, ' .:-+*=%@#', { invert: true })
             effect.setSize(container.clientWidth, container.clientHeight)
             
@@ -176,8 +181,9 @@ export default function AsciiAnimation() {
             dummyScene.background = new THREE.Color(0, 0, 0)
             const dummyCamera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 1, 1000)
             effect.render(dummyScene, dummyCamera)
+            */
             
-            console.log("ASCII animation initialized successfully")
+            console.log("🧪 DIAGNOSTIC: Plain WebGL renderer initialized successfully")
             setIsReady(true)
 
           } catch (error) {
@@ -186,8 +192,9 @@ export default function AsciiAnimation() {
           }
         }
 
+        // DIAGNOSTIC: Plain renderer animate function
         function animate() {
-          if (!isMounted || !scene || !camera || !effect || !sphere) return
+          if (!isMounted || !scene || !camera || !renderer || !sphere) return
 
           try {
             const timer = Date.now() - start
@@ -201,9 +208,9 @@ export default function AsciiAnimation() {
             sphere.rotation.x = timer * 0.0003
             sphere.rotation.z = timer * 0.0002
 
-            // CRITICAL: Force clearing the canvas before rendering
+            // DIAGNOSTIC: Use plain renderer instead of AsciiEffect
             renderer.clear()
-            effect.render(scene, camera)
+            renderer.render(scene, camera)
             
             if (isMounted) {
               animationRef.current = requestAnimationFrame(animate)
@@ -215,7 +222,7 @@ export default function AsciiAnimation() {
 
         // Resize handler
         function handleResize() {
-          if (!camera || !renderer || !effect || !containerRef.current) return
+          if (!camera || !renderer || !containerRef.current) return
           
           try {
             const container = containerRef.current
@@ -228,11 +235,9 @@ export default function AsciiAnimation() {
             // Update renderer
             renderer.setSize(container.clientWidth, container.clientHeight)
             
-            // Update effect
-            effect.setSize(container.clientWidth, container.clientHeight)
+            // Update effect (commented out for diagnostic)
+            // effect.setSize(container.clientWidth, container.clientHeight)
             
-            // Debug logging after resize
-            console.log("After resize - Effect size:", container.clientWidth, container.clientHeight)
             console.log("After resize - Renderer size:", renderer.getSize(new THREE.Vector2()))
             
           } catch (error) {
@@ -246,11 +251,11 @@ export default function AsciiAnimation() {
             cancelAnimationFrame(animationRef.current)
           }
           
-          if (containerRef.current && effect?.domElement) {
+          if (containerRef.current && renderer?.domElement) {
             try {
-              containerRef.current.removeChild(effect.domElement)
+              containerRef.current.removeChild(renderer.domElement)
             } catch (e) {
-              console.log("Effect element already removed")
+              console.log("Renderer element already removed")
             }
           }
           
@@ -266,10 +271,10 @@ export default function AsciiAnimation() {
 
         // CRITICAL: Initialize first, then delay animate() to let GPU stabilize
         init()
-        console.log("Delaying animation start for GPU stabilization...")
+        console.log("🧪 DIAGNOSTIC: Delaying animation start for GPU stabilization...")
         setTimeout(() => {
           if (isMounted) {
-            console.log("Starting animation after GPU stabilization")
+            console.log("🧪 DIAGNOSTIC: Starting plain renderer animation")
             animate()
           }
         }, 50)
