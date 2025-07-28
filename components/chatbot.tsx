@@ -49,7 +49,7 @@ export default function Chatbot() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://198.199.85.137:8000/chat", {
+      const response = await fetch("https://2c618459c0ce.ngrok-free.app/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
