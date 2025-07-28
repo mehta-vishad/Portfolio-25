@@ -80,34 +80,49 @@ export default function AsciiAnimation() {
             pointLight2.position.set(-500, -500, -500)
             scene.add(pointLight2)
 
-            // Sphere - same geometry as official example
+            // Sphere - same geometry as official example, NO transparency
             sphere = new THREE.Mesh(
               new THREE.SphereGeometry(200, 20, 10),
-              new THREE.MeshPhongMaterial({ flatShading: true })
+              new THREE.MeshPhongMaterial({ 
+                flatShading: true,
+                transparent: false // Ensure no transparency
+              })
             )
             scene.add(sphere)
 
-            // Plane
+            // Plane - NO transparency
             const plane = new THREE.Mesh(
               new THREE.PlaneGeometry(400, 400),
-              new THREE.MeshBasicMaterial({ color: 0xe0e0e0 })
+              new THREE.MeshBasicMaterial({ 
+                color: 0xe0e0e0,
+                transparent: false // Ensure no transparency
+              })
             )
             plane.position.y = -200
             plane.rotation.x = -Math.PI / 2
             scene.add(plane)
 
-            // Renderer - production-stable settings
+            // CRITICAL: Production-stable renderer settings
             renderer = new THREE.WebGLRenderer({
               antialias: false,
-              alpha: false,
-              powerPreference: "default"
+              alpha: false, // No alpha transparency
+              powerPreference: "default",
+              preserveDrawingBuffer: false, // Prevents stale pixels from being read
             })
+            
+            // CRITICAL: WebGL framebuffer fixes
+            renderer.autoClear = false // Manual clearing control
+            renderer.setClearColor(0x000000, 1) // Force black clear color
             renderer.setSize(container.clientWidth, container.clientHeight)
             renderer.setPixelRatio(1) // Fixed pixel ratio for consistency
 
             // ASCII effect - using exact same settings as official example
             effect = new AsciiEffect(renderer, ' .:-+*=%@#', { invert: true })
             effect.setSize(container.clientWidth, container.clientHeight)
+            
+            // Debug logging for size verification
+            console.log("Effect size:", container.clientWidth, container.clientHeight)
+            console.log("Renderer size:", renderer.getSize(new THREE.Vector2()))
             
             // Critical: Apply exact same styling as official example
             effect.domElement.style.color = 'white'
@@ -150,6 +165,8 @@ export default function AsciiAnimation() {
             sphere.rotation.x = timer * 0.0003
             sphere.rotation.z = timer * 0.0002
 
+            // CRITICAL: Force clearing the canvas before rendering
+            renderer.clear()
             effect.render(scene, camera)
             
             if (isMounted) {
@@ -167,10 +184,21 @@ export default function AsciiAnimation() {
           try {
             const container = containerRef.current
             console.log("Resizing to:", container.clientWidth, container.clientHeight)
+            
+            // Update camera
             camera.aspect = container.clientWidth / container.clientHeight
             camera.updateProjectionMatrix()
+            
+            // Update renderer
             renderer.setSize(container.clientWidth, container.clientHeight)
+            
+            // Update effect
             effect.setSize(container.clientWidth, container.clientHeight)
+            
+            // Debug logging after resize
+            console.log("After resize - Effect size:", container.clientWidth, container.clientHeight)
+            console.log("After resize - Renderer size:", renderer.getSize(new THREE.Vector2()))
+            
           } catch (error) {
             console.error("Resize error:", error)
           }
