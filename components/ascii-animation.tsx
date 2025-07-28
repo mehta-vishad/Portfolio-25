@@ -5,10 +5,26 @@ import { useEffect, useRef, useState } from "react"
 export default function AsciiAnimation() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isReady, setIsReady] = useState(false)
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
   const animationRef = useRef<number | undefined>(undefined)
-  const cleanupRef = useRef<(() => void) | null>(null)
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
+  const cleanupRef = useRef<{(): void; handleResize?: () => void} | null>(null)
 
+  // ResizeObserver to track container size changes
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      console.log("Container size updated:", width, height)
+      setContainerSize({ width, height })
+    })
+
+    observer.observe(containerRef.current)
+
+    return () => observer.disconnect()
+  }, [])
+
+  // Initialize animation only after proper DOM paint
   useEffect(() => {
     let isMounted = true
     let camera: any, renderer: any, effect: any
@@ -17,12 +33,14 @@ export default function AsciiAnimation() {
       if (!containerRef.current) return
       
       const { clientWidth, clientHeight } = containerRef.current
-      console.log("Container size:", clientWidth, clientHeight)
+      console.log("Loading animation with container size:", clientWidth, clientHeight)
       
       // Wait for container to be properly measured
       if (clientWidth === 0 || clientHeight === 0) {
         console.log("Container not ready, retrying...")
-        setTimeout(loadAnimation, 100)
+        setTimeout(() => {
+          if (isMounted) loadAnimation()
+        }, 100)
         return
       }
 
@@ -42,7 +60,7 @@ export default function AsciiAnimation() {
         function init() {
           try {
             const container = containerRef.current!
-            console.log("Initializing with container size:", container.clientWidth, container.clientHeight)
+            console.log("Initializing with final container size:", container.clientWidth, container.clientHeight)
             
             // Camera setup - using container dimensions
             camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 1, 1000)
@@ -142,8 +160,24 @@ export default function AsciiAnimation() {
           }
         }
 
-        // Setup cleanup function
-        cleanupRef.current = () => {
+        // Resize handler
+        function handleResize() {
+          if (!camera || !renderer || !effect || !containerRef.current) return
+          
+          try {
+            const container = containerRef.current
+            console.log("Resizing to:", container.clientWidth, container.clientHeight)
+            camera.aspect = container.clientWidth / container.clientHeight
+            camera.updateProjectionMatrix()
+            renderer.setSize(container.clientWidth, container.clientHeight)
+            effect.setSize(container.clientWidth, container.clientHeight)
+          } catch (error) {
+            console.error("Resize error:", error)
+          }
+        }
+
+        // Setup cleanup function with resize handler
+        const cleanup = () => {
           if (animationRef.current) {
             cancelAnimationFrame(animationRef.current)
           }
@@ -163,6 +197,8 @@ export default function AsciiAnimation() {
             scene.clear()
           }
         }
+        cleanup.handleResize = handleResize
+        cleanupRef.current = cleanup
 
         // Initialize and start - exactly like official example
         init()
@@ -174,95 +210,49 @@ export default function AsciiAnimation() {
       }
     }
 
-    const timer = setTimeout(loadAnimation, 200)
+    // DEFINITIVE FIX: Double requestAnimationFrame for proper DOM paint timing
+    const startAfterPaint = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (isMounted) {
+            console.log("Starting animation after DOM paint")
+            loadAnimation()
+          }
+        })
+      })
+    }
+
+    startAfterPaint()
 
     return () => {
       isMounted = false
-      clearTimeout(timer)
       if (cleanupRef.current) {
         cleanupRef.current()
       }
     }
   }, [])
 
-  // ResizeObserver for robust resize handling
+  // Handle container size changes
   useEffect(() => {
-    if (!containerRef.current) return
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect
-        console.log("ResizeObserver triggered:", width, height)
-        
-        if (width > 0 && height > 0) {
-          // Get the current camera, renderer, and effect from the closure
-          const container = containerRef.current
-          if (container && isReady) {
-            // We need to access these from the animation scope
-            // This is a bit tricky with the current structure, so let's use a different approach
-            const event = new CustomEvent('ascii-resize', { 
-              detail: { width, height } 
-            })
-            container.dispatchEvent(event)
-          }
-        }
-      }
-    })
-
-    observer.observe(containerRef.current)
-    resizeObserverRef.current = observer
-
-    return () => {
-      observer.disconnect()
-      resizeObserverRef.current = null
+    if (containerSize.width > 0 && containerSize.height > 0 && isReady && cleanupRef.current?.handleResize) {
+      console.log("Container size changed, updating animation:", containerSize)
+      cleanupRef.current.handleResize()
     }
-  }, [isReady])
-
-  // Handle custom resize events
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const handleResize = (event: any) => {
-      const { width, height } = event.detail
-      console.log("Handling resize:", width, height)
-      
-      // Find the Three.js elements in the DOM
-      const canvas = container.querySelector('canvas')
-      const asciiElement = container.querySelector('div')
-      
-      if (canvas && asciiElement) {
-        // Update canvas size
-        canvas.width = width
-        canvas.height = height
-        canvas.style.width = `${width}px`
-        canvas.style.height = `${height}px`
-        
-        // Update ASCII element size
-        asciiElement.style.width = `${width}px`
-        asciiElement.style.height = `${height}px`
-      }
-    }
-
-    container.addEventListener('ascii-resize', handleResize)
-
-    return () => {
-      container.removeEventListener('ascii-resize', handleResize)
-    }
-  }, [isReady])
+  }, [containerSize, isReady])
 
   return (
     <div 
       ref={containerRef} 
-      className="w-full h-[60vh] md:h-[70vh] bg-black"
       style={{ 
-        minHeight: "400px",
+        width: '100%',
+        height: '60vh',
+        minHeight: '400px',
+        minWidth: '100px',
         overflow: "hidden",
         position: "relative",
         opacity: isReady ? 1 : 0,
-        transition: "opacity 0.5s ease-in-out",
-        // Ensure the container is never 0x0
-        minWidth: "100px"
+        transition: 'opacity 0.5s ease-in-out',
+        backgroundColor: 'black' // Ensure black background during load
       }}
     />
   )
