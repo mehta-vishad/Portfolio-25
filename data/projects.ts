@@ -13,13 +13,97 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "khatri-ai",
+    title: "Khatri AI - Smart Email Assistant (Gmail Add-on)",
+    overview:
+      "Engineered a smart email assistant using Go and PostgreSQL, integrating OpenAI's Assistants API for contextual replies. The system features JWT authentication, Redis caching, and Google OAuth for Gmail thread mapping. A React-based Chrome extension injects AI-powered replies into dynamic Gmail views.",
+    image: "/images/projects/Khatri AI.webp",
+    link: "https://khatri-ai-project.com",
+    techStack: [
+      "/images/tech/Go.png",
+      "/images/tech/Postgresql.png",
+      "/images/tech/redis.webp",
+      "/images/tech/jwt.png",
+      "/images/tech/openai.webp",
+      "/images/tech/react.png"
+    ],
+    technologiesUsed: {
+      backend: "Go (Echo)",
+      database: "PostgreSQL",
+      authentication: "JWT, Google OAuth",
+      caching: "Redis",
+      aiIntegration: "OpenAI Assistants API",
+      extension: "React-based Chrome Extension",
+      language: "Go, React (JS)",
+      deployment: "Docker"
+    },
+    keyFeatures: [
+      "Developed backend in Go (Echo) with JWT authentication and Google OAuth login for Gmail integration.",
+      "Mapped Gmail threads to OpenAI Assistant sessions for contextual and persistent AI replies.",
+      "Built a dynamic Chrome extension in React to inject reply buttons within Gmail’s evolving SPA interface.",
+      "Used Redis to cache replies per Gmail thread, significantly reducing OpenAI API usage and response latency.",
+      "Ensured accurate DOM tracking and rendering within Gmail’s asynchronous interface.",
+      "Supported multi-account Gmail session handling and CORS-secured endpoints.",
+      "Deployed all services using Docker for isolated and scalable environments."
+    ],
+    challengesAndSolutions: [
+      "Overcame Gmail's single-page DOM mutations by dynamically tracking URL and hash changes to reliably inject the extension.",
+      "Minimized OpenAI usage by implementing per-thread caching with Redis and smart invalidation strategies.",
+      "Handled session persistence and security across Gmail accounts with JWT and OAuth-based identity management."
+    ],
+    conclusion:
+      "Khatri AI delivers intelligent email replies with minimal latency, Gmail-aware UX, and robust backend design. The stack ensures privacy, scalability, and AI-enhanced productivity, making it a strong foundation for email-focused automation products."
+  },
+  {
+    id: "semantic-search",
+    title: "Semantic Search Engine with Django & MeiliSearch",
+    overview:
+      "Built a production-grade semantic search engine using Django, MeiliSearch, and React. Integrated HuggingFace embeddings for vector-based search and automated real-time indexing for scalable document retrieval. Deployed via Docker with Redis caching and PostgreSQL persistence.",
+    image: "/images/projects/semantic search.gif",
+    link: "https://semantic-search-project.com",
+    techStack: [
+      "/images/tech/python.png",
+      "/images/tech/Postgresql.png",
+      "/images/tech/meili.png",
+      "/images/tech/redis.webp",
+      "/images/tech/docker.png",
+      "/images/tech/react.png"
+    ],
+    technologiesUsed: {
+      backend: "Python, Django, Django REST Framework",
+      database: "PostgreSQL",
+      search: "MeiliSearch with HuggingFace embeddings",
+      caching: "Redis",
+      containerization: "Docker",
+      frontend: "React",
+      language: "Python, Javascript",
+      deployment: "Docker Compose"
+    },
+    keyFeatures: [
+      "Developed Django-based backend with REST APIs to support high-speed vector and semantic search operations.",
+      "Integrated MeiliSearch with HuggingFace transformer embeddings for accurate and intelligent document retrieval.",
+      "Automated daily ingestion and indexing with zero-downtime updates for real-time search scalability.",
+      "Deployed React-based frontend with advanced search UI, sorting, and filters to optimize UX.",
+      "Used Redis to cache frequent queries and reduce response time by over 70%.",
+      "Implemented background workers to handle batch updates and re-indexing without impacting live service.",
+      "Built a Dockerized stack for smooth deployment and consistent environment replication."
+    ],
+    challengesAndSolutions: [
+      "Improved performance by decoupling indexing and ingestion via background jobs with Redis queueing.",
+      "Tuned MeiliSearch index settings for balanced recall and precision in clinical search use cases.",
+      "Addressed container orchestration and service discovery issues using Docker Compose across multiple environments."
+    ],
+    conclusion:
+      "The Semantic Search Engine blends Django's extensibility with MeiliSearch's speed to create a real-time, high-accuracy search system. With Dockerized deployment, smart caching, and robust indexing, it’s ideal for scalable knowledge retrieval applications."
+  },
+  {
     id: "luggshare",
     title: "LuggShare Website",
     overview:
       "Developed a dynamic web application that facilitates luggage space sharing among air commuters. This innovative platform connects travelers with excess luggage capacity to those needing extra space, optimizing travel efficiency and reducing costs.",
     image: "/images/projects/plane.gif",
     link: "https://project-one-link.com",
-    techStack: ["/js.png", "/React.png", "/mongo.webp", "/html.png", "/css.png"],
+    techStack: ["/images/tech/js.png", "/images/tech/React.png", "/images/tech/mongo.webp", "/images/tech/html.png", "/images/tech/css.png"],
     technologiesUsed: {
       frontend: "React",
       backend: "Node.js, Express",
@@ -51,7 +135,7 @@ export const projects: Project[] = [
       "Developed a portfolio website using Vite, TypeScript, and React, integrated with a backend powered by FastAPI. The website features a chatbot that provides interactive responses based on user queries, showcasing personal projects and professional experience.",
     image: "/images/projects/port.gif",
     link: "https://portfolio-website-link.com",
-    techStack: ["/vite.png", "/ts.webp", "/React.png", "/fastapi.png", "/openai.webp", "/hf.png"],
+    techStack: ["/images/tech/vite.png", "/images/tech/ts.webp", "/images/tech/React.png", "/images/tech/fastapi.png", "/images/tech/openai.webp", "/images/tech/hf.png"],
     technologiesUsed: {
       frontend: "React, TypeScript, Vite",
       backend: "FastAPI",
@@ -80,7 +164,7 @@ export const projects: Project[] = [
       "Developed an innovative solution to control and monitor IoT-enabled white goods manufactured by a leading provider. This project involved integrating REST endpoints provided by the manufacturer with an AWS Lex chatbot deployed on Slack. The chatbot allows users to control various attributes of appliances such as fire alarms, fans, generators, HVACs, and query their status in real-time.",
     image: "/images/projects/chatbot.gif",
     link: "https://project-three-link.com",
-    techStack: ["/aws.webp", "/python.png"],
+    techStack: ["/images/tech/aws.webp", "/images/tech/python.png"],
     technologiesUsed: {
       iotIntegration: "REST API endpoints provided by the manufacturer",
       chatbotPlatform: "AWS Lex",
@@ -109,7 +193,7 @@ export const projects: Project[] = [
       "Developed a powerful Resume Parser application using Tesseract OCR and spaCy's Named Entity Recognition (NER) to automate and enhance the hiring process. This solution improved the efficiency of the hiring process by 25% and reduced the time taken to find the right candidate by 25%.",
     image: "/images/projects/NLP.webp",
     link: "https://project-two-link.com",
-    techStack: ["/tess.png", "/spacy.png", "/python.png", "/flask.png", "/sql.png"],
+    techStack: ["/images/tech/tess.png", "/images/tech/spacy.png", "/images/tech/python.png", "/images/tech/flask.png", "/images/tech/sql.png"],
     technologiesUsed: {
       ocr: "Tesseract OCR",
       nlp: "spaCy (NER)",
@@ -139,7 +223,7 @@ export const projects: Project[] = [
       "Developed an advanced image classification system to detect cracks in the exterior walls of buildings. The project involved using state-of-the-art convolutional neural network (CNN) architectures such as VGG, ResNet, and DenseNet, followed by the creation of a custom shallow CNN that achieved comparable performance with significantly reduced training time. The custom model exhibited an accuracy of 99% and demonstrated superior performance in reducing false positives when tested on a custom drone-captured dataset. The findings were presented and published in the SMARTCOM Conference 2023 hosted by Springer LNNS.",
     image: "/images/projects/crack.gif",
     link: "https://project-four-link.com",
-    techStack: ["/tensorflow.png", "/keras.png", "/python.png", "/drone.png"],
+    techStack: ["/images/tech/tensorflow.png", "/images/tech/keras.png", "/images/tech/python.png", "/images/tech/drone.png"],
     technologiesUsed: {
       baselineModels: "VGG, ResNet, DenseNet",
       customModel: "Shallow Convolutional Neural Network",
@@ -169,7 +253,7 @@ export const projects: Project[] = [
       "Developed a custom dashboard using Streamlit for a client seeking a web application similar to Yellow Pages but focused solely on consultants in a specific region. The project involved scraping data from open-to-scrape websites using Selenium automation and integrating analytics about salaries and employee happiness in the area. Additionally, the dashboard featured a prediction model for employee happiness based on historical data, implemented using Support Vector Machines (SVM), with the results visualized within Streamlit.",
     image: "/images/projects/data.gif",
     link: "https://project-four-link.com",
-    techStack: ["/streamlit.png", "/selenium.png", "/python.png"],
+    techStack: ["/images/tech/streamlit.png", "/images/tech/selenium.png", "/images/tech/python.png"],
     technologiesUsed: {
       webFramework: "Streamlit",
       dataScraping: "Selenium",
@@ -191,58 +275,59 @@ export const projects: Project[] = [
     conclusion:
       "The Consultant Directory Dashboard with Analytics and Prediction Model showcases the successful integration of web development, data scraping, analytics, and machine learning to meet the client's requirements. By leveraging Streamlit for dashboard creation, Selenium for data scraping, and Support Vector Machines for predictive analytics, the project delivers a comprehensive solution tailored to the client's needs, empowering users to make informed decisions regarding consultant selection and workforce management.",
   },
-  {
-    id: "food-recognition",
-    title: "Food Recognition and Restaurant/Recipe Recommendation",
-    overview:
-      "Constructed an Image Classification model employing YOLOv5 for specialized Indian cuisine recognition in both image and video formats, facilitating personalized restaurant and recipe recommendations. The project aimed to demonstrate how platforms like YouTube could utilize such technology to satisfy instant cravings of users who enjoy watching food vlogs.",
-    image: "/images/projects/food.gif",
-    link: "https://project-four-link.com",
-    techStack: ["/tensorflow.png", "/keras.png", "/python.png"],
-    technologiesUsed: {
-      imageClassificationModels: "YOLOv5",
-      frameworks: "TensorFlow, Keras",
-      datasetCollection: "Custom dataset for Indian cuisine images and videos",
-      apiIntegration: "Zomato API for restaurant recommendations",
-      languages: "Python",
-    },
-    keyFeatures: [
-      "Implemented YOLOv5 for accurate recognition of Indian cuisine in both images and videos, enabling real-time food identification.",
-      "Integrated Zomato API to provide personalized restaurant recommendations based on recognized cuisine and user preferences, enhancing the dining experience for users in Chennai, India.",
-      "Developed algorithms to recommend recipes based on recognized food items, allowing users to explore new culinary adventures and recreate their favorite dishes at home.",
-      "Utilized advanced methodologies for model tuning and optimization to achieve a 92% validation set accuracy, ensuring robust performance across diverse food categories.",
-    ],
-    challengesAndSolutions: [
-      "Demonstrated how platforms like YouTube could utilize the Food Recognition system to offer personalized restaurant recommendations or recipe suggestions to users watching food vlogs, satisfying their instant cravings. The biggest challenge was to find quality labelled data for Indian cuisine which in the end was sparse. The only solution to it was creating a custom dataset that was painstakingly labelled over months using Roboflow.",
-    ],
-    conclusion:
-      "The Food Recognition Project and Restaurant/Recipe Recommendation system showcase the potential of AI-driven image classification and recommendation technologies in enhancing user experience and engagement on content platforms. By accurately recognizing Indian cuisine and providing personalized recommendations, the system not only satisfies instant cravings but also enriches the culinary experiences of users in Chennai, India.",
-  },
-  {
-    id: "hrm-app",
-    title: "Human Resource Management App for Gas Station Chain",
-    overview:
-      "Developed and implemented a Human Resource Management (HRM) App using Flutter and Firebase for a local chain of gas stations. The app revolutionized SME operations by replacing paper-based processes and streamlining various tasks, ultimately saving 20 human hours monthly for the client. It served as a comprehensive solution for managing staff attendance, payroll, and daily activity logging, while also providing insightful dashboard-like visualizations.",
-    image: "/images/projects/hr.gif",
-    link: "https://project-four-link.com",
-    techStack: ["/flutter.png", "/firebase.png", "/dart.png"],
-    technologiesUsed: {
-      mobileDevelopmentFramework: "Flutter",
-      backendServices: "Firebase",
-      database: "Firestore",
-      languages: "Dart",
-    },
-    keyFeatures: [
-      "Implemented features for tracking staff attendance, allowing employees to check in/out electronically, eliminating the need for manual attendance registers.",
-      "Integrated payroll management functionalities, enabling administrators to calculate salaries, bonuses, and deductions automatically based on attendance records.",
-      "Developed modules for logging daily activities such as sales reports, fuel density records, inventory management, and customer interactions, providing real-time insights into business operations.",
-      "Designed a dashboard-like setup within the app to visualize key performance indicators (KPIs), sales trends, employee productivity, and other relevant metrics, facilitating data-driven decision-making for management.",
-    ],
-    challengesAndSolutions: [
-      "Overcame resistance to change by providing comprehensive training and support to staff during the transition from paper-based to digital processes, ensuring smooth adoption of the HRM app.",
-      "Addressed concerns regarding data security and privacy by implementing robust authentication and access control mechanisms using Firebase Authentication and Firestore Security Rules.",
-    ],
-    conclusion:
-      "The Human Resource Management App for the gas station chain represents a significant milestone in digital transformation, offering a modern, efficient, and user-friendly solution for managing HR tasks and daily operations. By leveraging Flutter and Firebase, the app not only streamlines administrative processes but also empowers management with valuable insights and analytics, ultimately driving productivity and profitability for the client.",
-  },
+  // Commented out as requested
+  // {
+  //   id: "food-recognition",
+  //   title: "Food Recognition and Restaurant/Recipe Recommendation",
+  //   overview:
+  //     "Constructed an Image Classification model employing YOLOv5 for specialized Indian cuisine recognition in both image and video formats, facilitating personalized restaurant and recipe recommendations. The project aimed to demonstrate how platforms like YouTube could utilize such technology to satisfy instant cravings of users who enjoy watching food vlogs.",
+  //   image: "/images/projects/food.gif",
+  //   link: "https://project-four-link.com",
+  //   techStack: ["/images/tech/tensorflow.png", "/images/tech/keras.png", "/images/tech/python.png"],
+  //   technologiesUsed: {
+  //     imageClassificationModels: "YOLOv5",
+  //     frameworks: "TensorFlow, Keras",
+  //     datasetCollection: "Custom dataset for Indian cuisine images and videos",
+  //     apiIntegration: "Zomato API for restaurant recommendations",
+  //     languages: "Python",
+  //   },
+  //   keyFeatures: [
+  //     "Implemented YOLOv5 for accurate recognition of Indian cuisine in both images and videos, enabling real-time food identification.",
+  //     "Integrated Zomato API to provide personalized restaurant recommendations based on recognized cuisine and user preferences, enhancing the dining experience for users in Chennai, India.",
+  //     "Developed algorithms to recommend recipes based on recognized food items, allowing users to explore new culinary adventures and recreate their favorite dishes at home.",
+  //     "Utilized advanced methodologies for model tuning and optimization to achieve a 92% validation set accuracy, ensuring robust performance across diverse food categories.",
+  //   ],
+  //   challengesAndSolutions: [
+  //     "Demonstrated how platforms like YouTube could utilize the Food Recognition system to offer personalized restaurant recommendations or recipe suggestions to users watching food vlogs, satisfying their instant cravings. The biggest challenge was to find quality labelled data for Indian cuisine which in the end was sparse. The only solution to it was creating a custom dataset that was painstakingly labelled over months using Roboflow.",
+  //   ],
+  //   conclusion:
+  //     "The Food Recognition Project and Restaurant/Recipe Recommendation system showcase the potential of AI-driven image classification and recommendation technologies in enhancing user experience and engagement on content platforms. By accurately recognizing Indian cuisine and providing personalized recommendations, the system not only satisfies instant cravings but also enriches the culinary experiences of users in Chennai, India.",
+  // },
+  // {
+  //   id: "hrm-app",
+  //   title: "Human Resource Management App for Gas Station Chain",
+  //   overview:
+  //     "Developed and implemented a Human Resource Management (HRM) App using Flutter and Firebase for a local chain of gas stations. The app revolutionized SME operations by replacing paper-based processes and streamlining various tasks, ultimately saving 20 human hours monthly for the client. It served as a comprehensive solution for managing staff attendance, payroll, and daily activity logging, while also providing insightful dashboard-like visualizations.",
+  //   image: "/images/projects/hr.gif",
+  //   link: "https://project-four-link.com",
+  //   techStack: ["/images/tech/flutter.png", "/images/tech/firebase.png", "/images/tech/dart.png"],
+  //   technologiesUsed: {
+  //     mobileDevelopmentFramework: "Flutter",
+  //     backendServices: "Firebase",
+  //     database: "Firestore",
+  //     languages: "Dart",
+  //   },
+  //   keyFeatures: [
+  //     "Implemented features for tracking staff attendance, allowing employees to check in/out electronically, eliminating the need for manual attendance registers.",
+  //     "Integrated payroll management functionalities, enabling administrators to calculate salaries, bonuses, and deductions automatically based on attendance records.",
+  //     "Developed modules for logging daily activities such as sales reports, fuel density records, inventory management, and customer interactions, providing real-time insights into business operations.",
+  //     "Designed a dashboard-like setup within the app to visualize key performance indicators (KPIs), sales trends, employee productivity, and other relevant metrics, facilitating data-driven decision-making for management.",
+  //   ],
+  //   challengesAndSolutions: [
+  //     "Overcame resistance to change by providing comprehensive training and support to staff during the transition from paper-based to digital processes, ensuring smooth adoption of the HRM app.",
+  //     "Addressed concerns regarding data security and privacy by implementing robust authentication and access control mechanisms using Firebase Authentication and Firestore Security Rules.",
+  //   ],
+  //   conclusion:
+  //     "The Human Resource Management App for the gas station chain represents a significant milestone in digital transformation, offering a modern, efficient, and user-friendly solution for managing HR tasks and daily operations. By leveraging Flutter and Firebase, the app not only streamlines administrative processes but also empowers management with valuable insights and analytics, ultimately driving productivity and profitability for the client.",
+  // },
 ]
