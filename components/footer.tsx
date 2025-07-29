@@ -29,10 +29,10 @@ export default function Footer() {
   ]
 
   const navLinks = [
-    { name: "AMA", href: "#ama" },
-    { name: "About", href: "#about" },
+    { name: "AMA", href: "#chatbot" },
+    { name: "Experience", href: "#experience" },
     { name: "Projects", href: "#projects" },
-    { name: "Resume", href: "#resume" },
+    { name: "Home", href: "#home" },
   ]
 
   return (

@@ -82,7 +82,7 @@ export default function Chatbot() {
   }
 
   return (
-    <div className="chatbot-wrapper">
+    <div id="chatbot" className="chatbot-wrapper">
       <div className={`chatbot-container ${showUserForm ? 'blurred' : ''}`}>
         <div className="chatbot-header">TalkingCV - Ask me anything!</div>
         

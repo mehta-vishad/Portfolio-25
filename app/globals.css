@@ -74,3 +74,13 @@ body {
   grid-column: span 6;
   grid-row: span 2;
 }
+
+/* Smooth scrolling with offset for fixed navbar */
+section, #chatbot {
+  scroll-margin-top: 120px;
+}
+
+/* Ensure smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
