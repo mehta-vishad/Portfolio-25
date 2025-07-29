@@ -36,7 +36,7 @@ export default function ProjectsSection() {
         {/* Tablet grid (2 columns) */}
         <div className="hidden md:grid lg:hidden grid-cols-2 gap-2">
           {projects.map((project) => (
-            <div key={project.id}>
+            <div key={project.id} className="tablet-project-tile">
               <ProjectTile project={project} onOpenModal={handleOpenModal} />
             </div>
           ))}
@@ -45,7 +45,7 @@ export default function ProjectsSection() {
         {/* Mobile grid (1 column) */}
         <div className="grid md:hidden grid-cols-1 gap-2">
           {projects.map((project) => (
-            <div key={project.id}>
+            <div key={project.id} className="mobile-project-tile">
               <ProjectTile project={project} onOpenModal={handleOpenModal} />
             </div>
           ))}

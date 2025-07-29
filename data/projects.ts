@@ -25,7 +25,7 @@ export const projects: Project[] = [
       "/images/tech/redis.webp",
       "/images/tech/jwt.png",
       "/images/tech/openai.webp",
-      "/images/tech/react.png"
+      "/images/tech/React.png"
     ],
     technologiesUsed: {
       backend: "Go (Echo)",
@@ -67,7 +67,7 @@ export const projects: Project[] = [
       "/images/tech/meili.png",
       "/images/tech/redis.webp",
       "/images/tech/docker.png",
-      "/images/tech/react.png"
+      "/images/tech/React.png"
     ],
     technologiesUsed: {
       backend: "Python, Django, Django REST Framework",
